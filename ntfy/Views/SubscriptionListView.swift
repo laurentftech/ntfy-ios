@@ -174,14 +174,24 @@ struct SubscriptionItemRowView: View {
     
     @ViewBuilder
     private var connectionStatusIndicator: some View {
-        // Default to disconnected for now - polling integration to be completed
-        let state: ConnectionState = .disconnected
+        // Get actual connection state from polling service if available
+        let state: ConnectionState = getConnectionState()
         
         Circle()
             .fill(connectionColor(for: state))
             .frame(width: 10, height: 10)
             .padding(.trailing, 6)
             .help(state.rawValue)
+    }
+    
+    private func getConnectionState() -> ConnectionState {
+        guard let pollingService = appDelegate.pollingService else {
+            return .disconnected
+        }
+        guard let baseUrl = subscription.baseUrl else {
+            return .disconnected
+        }
+        return pollingService.connectionState(for: baseUrl)
     }
     
     private func connectionColor(for state: ConnectionState) -> Color {
