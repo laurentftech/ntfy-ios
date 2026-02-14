@@ -22,10 +22,15 @@ struct SettingsView: View {
                     DefaultServerView()
                 }
                 Section(
-                    header: Text("Users"),
-                    footer: Text("To access read-protected topics, you may add or edit users here. All topics for a given server will use the same user.")
+                    header: Text("Servers"),
+                    footer: Text("Configure authentication for your ntfy servers. Tap a server to add or edit credentials.")
                 ) {
-                    UserTableView()
+                    NavigationLink(destination: ServerListView()) {
+                        HStack {
+                            Image(systemName: "server.rack")
+                            Text("Manage Servers")
+                        }
+                    }
                 }
                 Section(header: Text("About")) {
                     AboutView()

@@ -176,17 +176,64 @@ class Store: ObservableObject {
     
     // MARK: Users
     
+    /// Authentication type for a user
+    enum AuthType: String {
+        case basic = "basic"      // Username/Password
+        case token = "token"     // Access Token
+    }
+    
+    /// Save user with username/password (Basic Auth)
     func saveUser(baseUrl: String, username: String, password: String) {
+        saveUserAuth(baseUrl: baseUrl, authType: .basic, username: username, password: password, token: nil)
+    }
+    
+    /// Save user with access token (Bearer Token)
+    func saveUserWithToken(baseUrl: String, token: String) {
+        saveUserAuth(baseUrl: baseUrl, authType: .token, username: nil, password: nil, token: token)
+    }
+    
+    /// Internal method to save user authentication
+    private func saveUserAuth(baseUrl: String, authType: AuthType, username: String?, password: String?, token: String?) {
         do {
             let user = getUser(baseUrl: baseUrl) ?? User(context: context)
             user.baseUrl = baseUrl
-            user.username = username
-            user.password = password
+            
+            if authType == .token {
+                // Store token with prefix
+                user.username = "TOKEN"  // Marker for token auth
+                user.password = "TOKEN:\(token ?? "")"
+            } else {
+                user.username = username
+                user.password = password
+            }
+            
             try context.save()
         } catch let error {
             Log.w(Store.tag, "Cannot store user", error)
             rollbackAndRefresh()
         }
+    }
+    
+    /// Get authentication type for a user
+    func getAuthType(for baseUrl: String) -> AuthType {
+        guard let user = getUser(baseUrl: baseUrl) else {
+            return .basic
+        }
+        // Check if it's a token (stored with TOKEN: prefix)
+        if let password = user.password, password.hasPrefix("TOKEN:") {
+            return .token
+        }
+        return .basic
+    }
+    
+    /// Get token for a user (if using token auth)
+    func getToken(for baseUrl: String) -> String? {
+        guard let user = getUser(baseUrl: baseUrl),
+              let password = user.password,
+              password.hasPrefix("TOKEN:") else {
+            return nil
+        }
+        return String(password.dropFirst(6))  // Remove "TOKEN:" prefix
     }
     
     func getUser(baseUrl: String) -> User? {

@@ -2,6 +2,7 @@ import SwiftUI
 import CoreData
 import FirebaseMessaging
 import UserNotifications
+import Combine
 
 struct SubscriptionListView: View {
     let tag = "SubscriptionList"
@@ -145,6 +146,9 @@ struct SubscriptionItemRowView: View {
     @ObservedObject var subscription: Subscription
     @EnvironmentObject private var appDelegate: AppDelegate
     
+    /// Force view refresh when connection state changes
+    @State private var connectionStateKey: String = ""
+    
     var body: some View {
         let totalNotificationCount = subscription.notificationCount()
         VStack(alignment: .leading, spacing: 0) {
@@ -170,6 +174,29 @@ struct SubscriptionItemRowView: View {
                 .foregroundColor(.gray)
         }
         .padding(.all, 4)
+        .onReceive(observeConnectionState()) { state in
+            // Force refresh when connection state changes
+            connectionStateKey = state.rawValue
+        }
+        .id(connectionStateKey)
+    }
+    
+    /// Create publisher to observe connection state changes
+    private func observeConnectionState() -> AnyPublisher<ConnectionState, Never> {
+        guard let pollingService = appDelegate.pollingService else {
+            return Just(.disconnected).eraseToAnyPublisher()
+        }
+        guard let baseUrl = subscription.baseUrl else {
+            return Just(.disconnected).eraseToAnyPublisher()
+        }
+        
+        // Return publisher that emits when this specific server's state changes
+        return pollingService.$connectionStates
+            .map { states in
+                states[baseUrl] ?? .disconnected
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     @ViewBuilder
@@ -203,6 +230,19 @@ struct SubscriptionItemRowView: View {
         case .disconnected:
             return Color.red
         }
+    }
+}
+
+/// Invisible view that observes connection state changes
+struct ConnectionStateObserver: View {
+    let baseUrl: String
+    @EnvironmentObject private var appDelegate: AppDelegate
+    
+    var body: some View {
+        // This view triggers a re-render when polling service state changes
+        // by accessing the connection state
+        let _ = appDelegate.pollingService?.connectionState(for: baseUrl)
+        return EmptyView()
     }
 }
 

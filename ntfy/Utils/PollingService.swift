@@ -157,10 +157,23 @@ class PollingService: NSObject, ObservableObject {
     
     // MARK: - Private Methods
     
-    /// Get Basic Auth header for a server URL
+    /// Get authorization header for a server URL (supports both Basic Auth and Bearer Token)
     private func getAuthHeader(for serverUrl: String) -> String? {
-        guard let store = store,
-              let user = store.getUser(baseUrl: serverUrl) else {
+        guard let store = store else {
+            return nil
+        }
+        
+        let authType = store.getAuthType(for: serverUrl)
+        
+        if authType == .token {
+            // Bearer token authentication
+            if let token = store.getToken(for: serverUrl) {
+                return "Bearer \(token)"
+            }
+        }
+        
+        // Basic authentication
+        guard let user = store.getUser(baseUrl: serverUrl) else {
             return nil
         }
         // Create Basic Auth header: "Basic base64(username:password)"
