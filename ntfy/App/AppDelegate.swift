@@ -10,18 +10,85 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     private let tag = "AppDelegate"
     private let pollTopic = "~poll" // See ntfy server if ever changed
     
+    // Badge count tracking
+    private var badgeCount: Int = 0
+    
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
+    
+    // MARK: - Polling Service (Alternative to Firebase)
+    
+    /// Polling service for receiving notifications without Firebase
+    private(set) var pollingService: PollingService?
+    
+    /// Whether to use polling instead of Firebase
+    /// Set to true if Firebase is not configured or user prefers polling
+    var usePolling: Bool = false
+    
+    /// Start the polling service
+    func startPollingService() {
+        guard usePolling else { return }
+        
+        let store = Store.shared
+        guard let subscriptions = store.getSubscriptions(), !subscriptions.isEmpty else {
+            Log.d(tag, "No subscriptions to poll")
+            return
+        }
+        
+        pollingService = PollingService()
+        pollingService?.delegate = self
+        pollingService?.startPolling(subscriptions: subscriptions)
+        Log.d(tag, "Started polling service for \(subscriptions.count) subscriptions")
+    }
+    
+    /// Stop the polling service
+    func stopPollingService() {
+        pollingService?.stopPolling()
+        pollingService = nil
+        Log.d(tag, "Stopped polling service")
+    }
+    
+    /// Register default notification categories with placeholder for ntfy actions
+    /// Categories must be registered at app launch, not when showing notifications
+    private func registerDefaultNotificationCategories() {
+        // Register a placeholder category for ntfy actions
+        // The actual actions will be set when the notification is created
+        let placeholderAction = UNNotificationAction(
+            identifier: "ntfy-action-placeholder",
+            title: " ",
+            options: []
+        )
+        let category = UNNotificationCategory(
+            identifier: "ntfyActions",
+            actions: [placeholderAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+        Log.d(tag, "Registered default notification categories")
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         Log.d(tag, "Launching AppDelegate")
 
-        FirebaseApp.configure()
-        FirebaseConfiguration.shared.setLoggerLevel(.max)
+        // Try to configure Firebase - may fail with dummy plist
+        // App will still work with polling mode
+        configureFirebaseIfAvailable()
 
         // Register app permissions for push notifications
         UNUserNotificationCenter.current().delegate = self
-        Messaging.messaging().delegate = self
+        
+        // Register default notification categories (needed for actions)
+        registerDefaultNotificationCategories()
+        
+        // Only setup Firebase Messaging if Firebase is configured
+        if FirebaseApp.app() != nil {
+            Messaging.messaging().delegate = self
+        } else {
+            // No Firebase - enable polling automatically
+            Log.d(tag, "No Firebase - enabling polling mode")
+            usePolling = true
+        }
         
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
             guard success else {
@@ -35,6 +102,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         application.registerForRemoteNotifications()
                 
         return true
+    }
+    
+    /// Configure Firebase if valid GoogleService-Info.plist exists
+    private func configureFirebaseIfAvailable() {
+        // Check if we're using a real Firebase config
+        guard let plistPath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+              let plist = NSDictionary(contentsOfFile: plistPath),
+              let clientId = plist["CLIENT_ID"] as? String,
+              !clientId.contains("dummy") else {
+            Log.w(tag, "No valid Firebase config found - running in polling-only mode")
+            return
+        }
+        
+        FirebaseApp.configure()
+        FirebaseConfiguration.shared.setLoggerLevel(.max)
+        Log.i(tag, "Firebase configured successfully")
     }
     
     /// Executed when a background notification arrives on the "~poll" topic. This is used to trigger polling of local topics.
@@ -63,6 +146,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // Skip if Firebase is not configured
+        guard FirebaseApp.app() != nil else {
+            Log.d(tag, "Firebase not configured, skipping APNs token registration")
+            return
+        }
+        
         let token = deviceToken.map { data in String(format: "%02.2hhx", data) }.joined()
         Messaging.messaging().apnsToken = deviceToken
         Log.d(tag, "Registered for remote notifications. Passing APNs token to Firebase: \(token)")
@@ -70,6 +159,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         Log.e(tag, "Failed to register for remote notifications", error)
+    }
+    
+    /// Update app icon badge with unread count
+    private func updateBadgeCount() {
+        badgeCount += 1
+        Log.d(tag, "Setting badge count to \(badgeCount)")
+        if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().setBadgeCount(badgeCount) { error in
+                if let error = error {
+                    Log.e(self.tag, "Failed to set badge count", error)
+                }
+            }
+        } else {
+            UIApplication.shared.applicationIconBadgeNumber = badgeCount
+        }
+    }
+    
+    /// Clear app icon badge
+    private func clearBadgeCount() {
+        badgeCount = 0
+        Log.d(tag, "Clearing badge count")
+        if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().setBadgeCount(0) { error in
+                if let error = error {
+                    Log.e(self.tag, "Failed to clear badge count", error)
+                }
+            }
+        } else {
+            UIApplication.shared.applicationIconBadgeNumber = 0
+        }
     }
     
     /// Create a local notification manually (as opposed to a remote notification being generated by Firebase). We need to make the
@@ -83,6 +202,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         UNUserNotificationCenter.current().add(request) { (error) in
             if let error = error {
                 Log.e(self.tag, "Unable to create notification", error)
+            } else {
+                // Update badge count after showing notification
+                self.updateBadgeCount()
             }
         }
     }
@@ -97,6 +219,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(willPresent)", userInfo)
+        // Don't clear badge when showing notification in foreground
+        // Badge is managed by SubscriptionManager when polling receives messages
         completionHandler([[.banner, .sound]])
     }
     
@@ -108,14 +232,18 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         let userInfo = response.notification.request.content.userInfo
         Log.d(tag, "Notification received via userNotificationCenter(didReceive)", userInfo)
+        Log.d(tag, "Action identifier: \(response.actionIdentifier)")
         guard let message = Message.from(userInfo: userInfo) else {
             Log.w(tag, "Cannot convert userInfo to message", userInfo)
             completionHandler()
             return
         }
         
+        Log.d(tag, "Message actions: \(String(describing: message.actions))")
+        
         let baseUrl = userInfo["base_url"] as? String ?? Config.appBaseUrl
         let action = message.actions?.first { $0.id == response.actionIdentifier }
+        Log.d(tag, "Matched action: \(String(describing: action))")
         
         // Show current topic
         if message.topic != "" {
@@ -128,6 +256,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         } else if let click = message.click, click != "", let url = URL(string: click) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
+        
+        // Clear badge when user interacts with notification
+        clearBadgeCount()
     
         completionHandler()
     }
@@ -135,6 +266,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        // Skip if Firebase is not configured
+        guard FirebaseApp.app() != nil else {
+            Log.d(tag, "Firebase not configured, skipping FCM token handling")
+            return
+        }
+        
         Log.d(tag, "Firebase token received: \(String(describing: fcmToken))")
         
         // Subscribe to ~poll topic
@@ -152,5 +289,20 @@ extension AppDelegate: MessagingDelegate {
                 }
             }
         }
+    }
+}
+
+// MARK: - PollingServiceDelegate
+
+extension AppDelegate: PollingServiceDelegate {
+    func pollingService(_ service: PollingService, didReceiveMessage message: Message, for subscription: Subscription) {
+        Log.d(tag, "Received message via polling: \(message.id)")
+        
+        // Store the message
+        let store = Store.shared
+        store.save(notificationFromMessage: message, withSubscription: subscription)
+        
+        // Show notification
+        showNotification(subscription, message)
     }
 }

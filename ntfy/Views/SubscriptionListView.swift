@@ -3,10 +3,18 @@ import CoreData
 import FirebaseMessaging
 import UserNotifications
 
+/// Connection state for polling subscription
+enum ConnectionState: String {
+    case connected = "Connected"
+    case connecting = "Connecting..."
+    case disconnected = "Disconnected"
+}
+
 struct SubscriptionListView: View {
     let tag = "SubscriptionList"
     
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var appDelegate: AppDelegate
     @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
     
@@ -142,11 +150,15 @@ struct SubscriptionItemNavView: View {
 
 struct SubscriptionItemRowView: View {
     @ObservedObject var subscription: Subscription
+    @EnvironmentObject private var appDelegate: AppDelegate
     
     var body: some View {
         let totalNotificationCount = subscription.notificationCount()
         VStack(alignment: .leading, spacing: 0) {
             HStack {
+                // Connection status indicator
+                connectionStatusIndicator
+                    
                 Text(subscription.displayName())
                     .font(.headline)
                     .bold()
@@ -165,6 +177,29 @@ struct SubscriptionItemRowView: View {
                 .foregroundColor(.gray)
         }
         .padding(.all, 4)
+    }
+    
+    @ViewBuilder
+    private var connectionStatusIndicator: some View {
+        // Default to disconnected for now - polling integration to be completed
+        let state: ConnectionState = .disconnected
+        
+        Circle()
+            .fill(connectionColor(for: state))
+            .frame(width: 10, height: 10)
+            .padding(.trailing, 6)
+            .help(state.rawValue)
+    }
+    
+    private func connectionColor(for state: ConnectionState) -> Color {
+        switch state {
+        case .connected:
+            return Color.green
+        case .connecting:
+            return Color.orange
+        case .disconnected:
+            return Color.red
+        }
     }
 }
 

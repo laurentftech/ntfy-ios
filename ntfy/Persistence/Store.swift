@@ -18,9 +18,17 @@ class Store: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
 
     init(inMemory: Bool = false) {
-        let storeUrl = (inMemory) ? URL(fileURLWithPath: "/dev/null") : FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup)!
-            .appendingPathComponent("ntfy.sqlite")
+        let storeUrl: URL
+        if inMemory {
+            storeUrl = URL(fileURLWithPath: "/dev/null")
+        } else if let appGroupUrl = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Store.appGroup) {
+            storeUrl = appGroupUrl.appendingPathComponent("ntfy.sqlite")
+        } else {
+            // Fallback for when App Group is not configured (e.g., in simulator without entitlements)
+            Log.w(Store.tag, "App Group not available, using documents directory")
+            storeUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("ntfy.sqlite")
+        }
         let description = NSPersistentStoreDescription(url: storeUrl)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
@@ -98,6 +106,10 @@ class Store: ObservableObject {
     
     func getSubscriptions() -> [Subscription]? {
         return try? context.fetch(Subscription.fetchRequest())
+    }
+    
+    func getAllNotifications() -> [Notification]? {
+        return try? context.fetch(Notification.fetchRequest())
     }
     
     func delete(subscription: Subscription) {

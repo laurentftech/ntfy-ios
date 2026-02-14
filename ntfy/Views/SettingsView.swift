@@ -4,10 +4,17 @@ import StoreKit
 
 struct SettingsView: View {
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var appDelegate: AppDelegate
     
     var body: some View {
         NavigationView {
             Form {
+                Section(
+                    header: Text("Delivery Method"),
+                    footer: Text("Polling works without Firebase. Use this for self-hosted servers or if you don't want Google dependencies.")
+                ) {
+                    DeliveryMethodView()
+                }
                 Section(
                     header: Text("General"),
                     footer: Text("When subscribing to new topics, this server will be used as a default.")
@@ -33,9 +40,11 @@ struct SettingsView: View {
 
 struct DefaultServerView: View {
     @EnvironmentObject private var store: Store
+    @EnvironmentObject private var appDelegate: AppDelegate
     @FetchRequest(sortDescriptors: []) var prefs: FetchedResults<Preference>
     @State private var showDialog = false
     @State private var newDefaultBaseUrl: String = ""
+    @AppStorage("usePolling") private var usePolling = false
     
     private var defaultBaseUrl: String {
         prefs
@@ -124,6 +133,58 @@ struct DefaultServerView: View {
     
     private func resetAndHide() {
         showDialog = false
+    }
+}
+
+// MARK: - Delivery Method View
+
+struct DeliveryMethodView: View {
+    @EnvironmentObject private var appDelegate: AppDelegate
+    @AppStorage("usePolling") private var usePolling = false
+    @State private var showingAlert = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle(isOn: $usePolling) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Use Polling")
+                        .foregroundColor(.primary)
+                    Text(usePolling ? "Polling enabled" : "Firebase push")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            }
+            .onChange(of: usePolling) { newValue in
+                if newValue {
+                    // Enable polling
+                    appDelegate.usePolling = true
+                    appDelegate.startPollingService()
+                } else {
+                    // Disable polling, use Firebase
+                    appDelegate.stopPollingService()
+                    appDelegate.usePolling = false
+                }
+            }
+            
+            if !usePolling {
+                HStack {
+                    Image(systemName: "bell.fill")
+                        .foregroundColor(.blue)
+                    Text("Firebase (Push)")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            } else {
+                HStack {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .foregroundColor(.orange)
+                    Text("Polling (No instant notifications)")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 

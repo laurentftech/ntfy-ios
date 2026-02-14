@@ -27,6 +27,11 @@ struct AppMain: App {
                     
                     Log.d(tag, "App became active, refreshing objects")
                     store.hardRefresh()
+                    
+                    // Start polling if enabled (no Firebase)
+                    if delegate.usePolling {
+                        delegate.startPollingService()
+                    }
                 }
         }
     }

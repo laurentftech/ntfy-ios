@@ -1,5 +1,7 @@
 import Foundation
 import FirebaseMessaging
+import UserNotifications
+import UIKit
 
 /// Manager to combine persisting a subscription to the data store and subscribing to Firebase.
 /// This is to centralize the logic in one place.
@@ -57,10 +59,57 @@ struct SubscriptionManager {
                 DispatchQueue.main.sync {
                     for message in messages {
                         store.save(notificationFromMessage: message, withSubscription: subscription)
+                        // Show local notification and update badge
+                        showLocalNotification(message: message, subscription: subscription)
                     }
                 }
             }
             completionHandler(messages)
+        }
+    }
+    
+    /// Show local notification for the message
+    private func showLocalNotification(message: Message, subscription: Subscription) {
+        let content = UNMutableNotificationContent()
+        content.title = message.title ?? topicShortUrl(baseUrl: subscription.baseUrl ?? "?", topic: message.topic)
+        content.body = message.message ?? ""
+        content.sound = .default
+        content.threadIdentifier = topicUrl(baseUrl: subscription.baseUrl ?? "?", topic: message.topic)
+        content.userInfo = message.toUserInfo()
+        content.userInfo["base_url"] = subscription.baseUrl ?? ""
+        
+        let request = UNNotificationRequest(identifier: message.id, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                Log.e(self.tag, "Failed to show notification", error)
+            } else {
+                // Update badge count
+                self.updateBadgeCount()
+            }
+        }
+    }
+    
+    /// Update app badge count
+    private func updateBadgeCount() {
+        if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
+                DispatchQueue.main.async {
+                    let badgeCount = notifications.count
+                    UNUserNotificationCenter.current().setBadgeCount(badgeCount) { error in
+                        if let error = error {
+                            Log.e(self.tag, "Failed to set badge count", error)
+                        } else {
+                            Log.d(self.tag, "Badge count set to \(badgeCount)")
+                        }
+                    }
+                }
+            }
+        } else {
+            UNUserNotificationCenter.current().getDeliveredNotifications { notifications in
+                DispatchQueue.main.async {
+                    UIApplication.shared.applicationIconBadgeNumber = notifications.count
+                }
+            }
         }
     }
 }
