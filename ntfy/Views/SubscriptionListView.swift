@@ -10,43 +10,36 @@ struct SubscriptionListView: View {
     @EnvironmentObject private var appDelegate: AppDelegate
     @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
-    @State private var navigationPath = NavigationPath()
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
     
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            Group {
-                if #available(iOS 15.0, *) {
-                    subscriptionList
-                        .refreshable {
-                            subscriptionsModel.subscriptions.forEach { subscription in
-                                subscriptionManager.poll(subscription)
-                            }
+        NavigationView {
+            if #available(iOS 15.0, *) {
+                subscriptionList
+                    .refreshable {
+                        subscriptionsModel.subscriptions.forEach { subscription in
+                            subscriptionManager.poll(subscription)
                         }
-                } else {
-                    subscriptionList
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                Button {
-                                    subscriptionsModel.subscriptions.forEach { subscription in
-                                        subscriptionManager.poll(subscription)
-                                    }
-                                } label: {
-                                    Image(systemName: "arrow.clockwise")
+                    }
+            } else {
+                subscriptionList
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                subscriptionsModel.subscriptions.forEach { subscription in
+                                    subscriptionManager.poll(subscription)
                                 }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
                             }
                         }
-                }
-            }
-            .navigationDestination(for: String.self) { baseUrl in
-                if let subscription = subscriptionsModel.subscriptions.first(where: { $0.urlString() == baseUrl }) {
-                    NotificationListView(subscription: subscription)
-                }
+                    }
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
     
     private var subscriptionList: some View {
@@ -119,7 +112,11 @@ struct SubscriptionItemNavView: View {
     
     private var subscriptionRow: some View {
         ZStack {
-            NavigationLink(value: subscription.urlString()) {
+            NavigationLink(
+                destination: NotificationListView(subscription: subscription),
+                tag: subscription.urlString(),
+                selection: $delegate.selectedBaseUrl
+            ) {
                 EmptyView()
             }
             .opacity(0.0)
