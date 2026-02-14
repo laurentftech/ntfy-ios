@@ -35,7 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
             return
         }
         
-        pollingService = PollingService()
+        pollingService = PollingService(store: store)
         pollingService?.delegate = self
         pollingService?.startPolling(subscriptions: subscriptions)
         Log.d(tag, "Started polling service for \(subscriptions.count) subscriptions")

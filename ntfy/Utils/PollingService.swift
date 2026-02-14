@@ -32,6 +32,9 @@ class PollingService: NSObject, ObservableObject {
     /// Whether polling is currently active
     private(set) var isPolling = false
     
+    /// Reference to the Store for getting user credentials
+    private var store: Store?
+    
     // MARK: - Public API
     
     /// Get connection state for a specific server
@@ -46,7 +49,8 @@ class PollingService: NSObject, ObservableObject {
     
     // MARK: - Initialization
     
-    override init() {
+    init(store: Store? = nil) {
+        self.store = store
         super.init()
     }
     
@@ -79,13 +83,15 @@ class PollingService: NSObject, ObservableObject {
             let topics = subs.compactMap { $0.topic }
             guard !topics.isEmpty else { continue }
             
-            // Get auth token for this server (if any)
-            let authToken = getAuthToken(for: serverUrl)
+            // Get auth header and bearer token for this server (if any)
+            let authHeader = getAuthHeader(for: serverUrl)
+            let bearerToken = getBearerToken(for: serverUrl)
             
             let client = NtfyClient(
                 serverURL: serverUrl,
                 topics: topics,
-                authToken: authToken,
+                authHeader: authHeader,
+                bearerToken: bearerToken,
                 fetchMissed: true
             )
             client.delegate = self
@@ -121,11 +127,13 @@ class PollingService: NSObject, ObservableObject {
                 // TODO: Handle adding topic dynamically
             } else {
                 // Create new client for this server
-                let authToken = getAuthToken(for: baseUrl)
+                let authHeader = getAuthHeader(for: baseUrl)
+                let bearerToken = getBearerToken(for: baseUrl)
                 let client = NtfyClient(
                     serverURL: baseUrl,
                     topics: [topic],
-                    authToken: authToken,
+                    authHeader: authHeader,
+                    bearerToken: bearerToken,
                     fetchMissed: true
                 )
                 client.delegate = self
@@ -149,8 +157,22 @@ class PollingService: NSObject, ObservableObject {
     
     // MARK: - Private Methods
     
-    private func getAuthToken(for serverUrl: String) -> String? {
-        // TODO: Get token from Store for authenticated servers
+    /// Get Basic Auth header for a server URL
+    private func getAuthHeader(for serverUrl: String) -> String? {
+        guard let store = store,
+              let user = store.getUser(baseUrl: serverUrl) else {
+            return nil
+        }
+        // Create Basic Auth header: "Basic base64(username:password)"
+        let basicUser = user.toBasicUser()
+        return "Basic " + String(format: "%@:%@", basicUser.username, basicUser.password)
+            .data(using: String.Encoding.utf8)!
+            .base64EncodedString()
+    }
+    
+    /// Get Bearer token for a server URL (if configured)
+    private func getBearerToken(for serverUrl: String) -> String? {
+        // TODO: Get token from Store when token-based auth is implemented
         return nil
     }
     

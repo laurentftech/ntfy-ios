@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		02024E60283D7CBB0064224A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02024E5F283D7CBB0064224A /* Extensions.swift */; };
-		4D63AD3F2F40B39D00582A2F /* PollingService 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D63AD3E2F40B39D00582A2F /* PollingService 2.swift */; };
-		4D63AD402F40B39D00582A2F /* NtfyClient 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D63AD3D2F40B39D00582A2F /* NtfyClient 2.swift */; };
+		4D1326DB2F412F530023BB5C /* NtfyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1326D92F412F530023BB5C /* NtfyClient.swift */; };
+		4D1326DC2F412F530023BB5C /* PollingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1326DA2F412F530023BB5C /* PollingService.swift */; };
 		4DE95F772F41230A008A5E1E /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE95F762F41230A008A5E1E /* ToastView.swift */; };
 		9407EDDA284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9407EDDB284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
@@ -83,8 +83,8 @@
 
 /* Begin PBXFileReference section */
 		02024E5F283D7CBB0064224A /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		4D63AD3D2F40B39D00582A2F /* NtfyClient 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NtfyClient 2.swift"; sourceTree = "<group>"; };
-		4D63AD3E2F40B39D00582A2F /* PollingService 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PollingService 2.swift"; sourceTree = "<group>"; };
+		4D1326D92F412F530023BB5C /* NtfyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NtfyClient.swift; sourceTree = "<group>"; };
+		4D1326DA2F412F530023BB5C /* PollingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollingService.swift; sourceTree = "<group>"; };
 		4DE95F762F41230A008A5E1E /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		9407EDD9284ADE1F00C1C334 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		9474F1BD282F2AA700CDE4DD /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -242,8 +242,8 @@
 		9474F210283326E000CDE4DD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				4D63AD3D2F40B39D00582A2F /* NtfyClient 2.swift */,
-				4D63AD3E2F40B39D00582A2F /* PollingService 2.swift */,
+				4D1326D92F412F530023BB5C /* NtfyClient.swift */,
+				4D1326DA2F412F530023BB5C /* PollingService.swift */,
 				9474F20E283326C500CDE4DD /* ApiService.swift */,
 				94CD1969283E666900973B93 /* EmojiManager.swift */,
 				9474F211283327C200CDE4DD /* Helpers.swift */,
@@ -380,8 +380,6 @@
 				02024E60283D7CBB0064224A /* Extensions.swift in Sources */,
 				948671472841B0B20093C7A4 /* NotificationContent.swift in Sources */,
 				9474F1F92830835400CDE4DD /* Store.swift in Sources */,
-				4D63AD3F2F40B39D00582A2F /* PollingService 2.swift in Sources */,
-				4D63AD402F40B39D00582A2F /* NtfyClient 2.swift in Sources */,
 				9474F212283327C200CDE4DD /* Helpers.swift in Sources */,
 				9474F217283531A300CDE4DD /* Log.swift in Sources */,
 				4DE95F772F41230A008A5E1E /* ToastView.swift in Sources */,
@@ -399,6 +397,8 @@
 				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
 				94867143283EC9960093C7A4 /* Actions.swift in Sources */,
+				4D1326DB2F412F530023BB5C /* NtfyClient.swift in Sources */,
+				4D1326DC2F412F530023BB5C /* PollingService.swift in Sources */,
 				9474F20F283326C500CDE4DD /* ApiService.swift in Sources */,
 				94B736D7284AF9BE003D69FB /* MainView.swift in Sources */,
 				9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */,

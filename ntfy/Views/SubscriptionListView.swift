@@ -3,13 +3,6 @@ import CoreData
 import FirebaseMessaging
 import UserNotifications
 
-/// Connection state for polling subscription
-enum ConnectionState: String {
-    case connected = "Connected"
-    case connecting = "Connecting..."
-    case disconnected = "Disconnected"
-}
-
 struct SubscriptionListView: View {
     let tag = "SubscriptionList"
     

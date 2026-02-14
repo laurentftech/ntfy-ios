@@ -25,18 +25,32 @@ final class NtfyClient: NSObject, @unchecked Sendable {
     private let topics: [String]
     private let fetchMissed: Bool
     private let lock = NSLock()
-    private var _authToken: String?
+    private var _authHeader: String?
+    private var _bearerToken: String?
     
-    private var authToken: String? {
+    private var authHeader: String? {
         get {
             lock.lock()
             defer { lock.unlock() }
-            return _authToken
+            return _authHeader
         }
         set {
             lock.lock()
             defer { lock.unlock() }
-            _authToken = newValue
+            _authHeader = newValue
+        }
+    }
+    
+    private var bearerToken: String? {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _bearerToken
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _bearerToken = newValue
         }
     }
     
@@ -62,10 +76,18 @@ final class NtfyClient: NSObject, @unchecked Sendable {
     
     // MARK: - Initialization
     
-    init(serverURL: String, topics: [String], authToken: String? = nil, fetchMissed: Bool = false) {
+    /// Initialize with Basic Auth (username/password) OR Bearer Token
+    /// - Parameters:
+    ///   - serverURL: The ntfy server URL
+    ///   - topics: Array of topics to subscribe to
+    ///   - authHeader: Optional Basic Auth header (e.g., "Basic base64-encoded-credentials")
+    ///   - bearerToken: Optional Bearer token for token-based auth
+    ///   - fetchMissed: Whether to fetch missed messages since last connection
+    init(serverURL: String, topics: [String], authHeader: String? = nil, bearerToken: String? = nil, fetchMissed: Bool = false) {
         self.serverURL = serverURL
         self.topics = topics
-        self._authToken = authToken
+        self._authHeader = authHeader
+        self._bearerToken = bearerToken
         self.fetchMissed = fetchMissed
         
         // Restore last message time from UserDefaults for fetch_missed
@@ -126,8 +148,11 @@ final class NtfyClient: NSObject, @unchecked Sendable {
         request.httpMethod = "GET"
         request.setValue("application/x-ndjson", forHTTPHeaderField: "Accept")
         
-        if let token = authToken {
+        // Use Bearer token if available, otherwise use Basic Auth header
+        if let token = bearerToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else if let header = authHeader {
+            request.setValue(header, forHTTPHeaderField: "Authorization")
         }
         
         buffer.removeAll()
@@ -148,9 +173,9 @@ final class NtfyClient: NSObject, @unchecked Sendable {
         buffer.removeAll()
     }
     
-    /// Update the auth token and reconnect if connected
-    func updateAuthToken(_ token: String?) {
-        self.authToken = token
+    /// Update the bearer token and reconnect if connected
+    func updateBearerToken(_ token: String?) {
+        self.bearerToken = token
         if dataTask != nil {
             reconnect()
         }
