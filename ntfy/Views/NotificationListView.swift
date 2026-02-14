@@ -298,26 +298,7 @@ struct NotificationRowView: View {
             if !notification.actionsList().isEmpty {
                 HStack {
                     ForEach(notification.actionsList()) { action in
-                        if #available(iOS 15, *) {
-                            Button(action.label) {
-                                ActionExecutor.execute(action)
-                            }
-                            .buttonStyle(.borderedProminent)
-                        } else {
-                            Button(action: {
-                                ActionExecutor.execute(action)
-                            }) {
-                                Text(action.label)
-                                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                                    .foregroundColor(.white)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.white, lineWidth: 2)
-                                    )
-                            }
-                            .background(Color.accentColor)
-                            .cornerRadius(10)
-                        }
+                        actionButton(action: action)
                     }
                 }
                 .padding([.top], 5)
@@ -327,6 +308,30 @@ struct NotificationRowView: View {
         .onTapGesture {
             // TODO: This gives no feedback to the user, and it only works if the text is tapped
             UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+        }
+    }
+    
+    @ViewBuilder
+    private func actionButton(action: Action) -> some View {
+        if #available(iOS 15, *) {
+            Button(action.label) {
+                ActionExecutor.execute(action)
+            }
+            .buttonStyle(.borderedProminent)
+        } else {
+            Button(action: {
+                ActionExecutor.execute(action)
+            }) {
+                Text(action.label)
+                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
+                    .foregroundColor(.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.white, lineWidth: 2)
+                    )
+            }
+            .background(Color.accentColor)
+            .cornerRadius(10)
         }
     }
 }
