@@ -10,13 +10,14 @@ struct SubscriptionListView: View {
     @EnvironmentObject private var appDelegate: AppDelegate
     @ObservedObject var subscriptionsModel = SubscriptionsObservable()
     @State private var showingAddDialog = false
+    @State private var navigationPath = NavigationPath()
     
     private var subscriptionManager: SubscriptionManager {
         return SubscriptionManager(store: store)
     }
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
                 if #available(iOS 15.0, *) {
                     subscriptionList
