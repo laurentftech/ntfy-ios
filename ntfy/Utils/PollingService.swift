@@ -120,7 +120,7 @@ class PollingService: NSObject, ObservableObject {
         }
         
         if isPolling {
-            if let existingClient = clients[baseUrl] {
+            if clients[baseUrl] != nil {
                 // Client exists but might not have this topic
                 // For simplicity, we'll need to restart with new topic
                 Log.d(tag, "Adding subscription to existing client: \(baseUrl)/\(topic)")

@@ -97,18 +97,10 @@ struct SubscriptionItemNavView: View {
     }
     
     var body: some View {
-        if #available(iOS 15.0, *) {
-            subscriptionRow
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        self.unsubscribeAlert = true
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
-                    }
-                }
-        } else {
-            subscriptionRow
-        }
+        subscriptionRow
+            .swipeToDelete {
+                self.unsubscribeAlert = true
+            }
     }
     
     private var subscriptionRow: some View {

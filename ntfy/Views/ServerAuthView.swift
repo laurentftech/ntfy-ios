@@ -151,7 +151,7 @@ struct ServerAuthView: View {
         testResult = nil
         
         // Build URL with auth
-        var urlComponents = URLComponents(string: "\(baseUrl)/_check")
+        let urlComponents = URLComponents(string: "\(baseUrl)/_check")
         
         var request = URLRequest(url: urlComponents!.url!)
         request.httpMethod = "GET"

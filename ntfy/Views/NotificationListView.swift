@@ -16,7 +16,10 @@ struct NotificationListView: View {
     
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<Notification>()
-    
+    @State private var searchText = ""
+    @State private var lastRefreshed: Date? = nil
+    @State private var showCopiedToast = false
+
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
     
@@ -24,6 +27,18 @@ struct NotificationListView: View {
         return SubscriptionManager(store: store)
     }
     
+    private var filteredNotifications: [Notification] {
+        if searchText.isEmpty {
+            return notificationsModel.notifications
+        }
+        let query = searchText.lowercased()
+        return notificationsModel.notifications.filter { notification in
+            (notification.message?.lowercased().contains(query) ?? false) ||
+            (notification.title?.lowercased().contains(query) ?? false) ||
+            (notification.tags?.lowercased().contains(query) ?? false)
+        }
+    }
+
     init(subscription: Subscription) {
         self.subscription = subscription
         self.notificationsModel = NotificationsObservable(subscriptionID: subscription.objectID)
@@ -32,8 +47,10 @@ struct NotificationListView: View {
     var body: some View {
         if #available(iOS 15.0, *) {
             notificationList
+                .searchable(text: $searchText, prompt: "Search notifications")
                 .refreshable {
                     subscriptionManager.poll(subscription)
+                    lastRefreshed = Date()
                 }
         } else {
             notificationList
@@ -42,8 +59,15 @@ struct NotificationListView: View {
     
     private var notificationList: some View {
         List(selection: $selection) {
-            ForEach(notificationsModel.notifications, id: \.self) { notification in
-                NotificationRowView(notification: notification)
+            ForEach(filteredNotifications, id: \.self) { notification in
+                NotificationRowView(notification: notification, showCopiedToast: $showCopiedToast)
+            }
+            if #available(iOS 15.0, *), let lastRefreshed = lastRefreshed, !filteredNotifications.isEmpty {
+                Text("Last updated: \(lastRefreshed, style: .relative) ago")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .listRowSeparator(.hidden)
             }
         }
         .listStyle(PlainListStyle())
@@ -148,25 +172,46 @@ struct NotificationListView: View {
         .overlay(Group {
             if notificationsModel.notifications.count == 0 {
                 VStack {
-                    Text("You haven't received any notifications for this topic yet.")
+                    Text("No notifications yet")
                         .font(.title2)
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
+                        .padding(.bottom, 4)
+
+                    Text("Notifications for this topic will appear here.")
+                        .font(.body)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
                         .padding(.bottom)
-                    
+
                     if #available(iOS 15.0, *) {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on [ntfy.sh](https://ntfy.sh) and [in the docs](https://ntfy.sh/docs).")
+                        Text("To send a notification, PUT or POST to the topic URL:\n\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nMore info on [ntfy.sh](https://ntfy.sh) and [the docs](https://ntfy.sh/docs).")
                             .foregroundColor(.gray)
                     } else {
-                        Text("To send notifications to this topic, simply PUT or POST to the topic URL.\n\nExample:\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nDetailed instructions are available on https://ntfy.sh and https://ntfy.sh/docs.")
+                        Text("To send a notification, PUT or POST to the topic URL:\n\n`$ curl -d \"hi\" ntfy.sh/\(subscription.topicName())`\n\nMore info on https://ntfy.sh and https://ntfy.sh/docs.")
                             .foregroundColor(.gray)
                     }
                 }
                 .padding(40)
             }
         })
+        .overlay(
+            Group {
+                if showCopiedToast {
+                    Text("Copied")
+                        .font(.caption)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color(.systemGray4))
+                        .cornerRadius(8)
+                        .transition(.opacity)
+                }
+            },
+            alignment: .bottom
+        )
         .onAppear {
             cancelSubscriptionNotifications()
+            lastRefreshed = Date()
         }
     }
     
@@ -251,20 +296,13 @@ struct NotificationListView: View {
 struct NotificationRowView: View {
     @EnvironmentObject private var store: Store
     @ObservedObject var notification: Notification
+    @Binding var showCopiedToast: Bool
     
     var body: some View {
-        if #available(iOS 15.0, *) {
-            notificationRow
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.delete(notification: notification)
-                    } label: {
-                        Label("Delete", systemImage: "trash.circle")
-                    }
-                }
-        } else {
-            notificationRow
-        }
+        notificationRow
+            .swipeToDelete {
+                store.delete(notification: notification)
+            }
     }
     
     private var notificationRow: some View {
@@ -305,34 +343,43 @@ struct NotificationRowView: View {
             }
         }
         .padding(.all, 4)
-        .onTapGesture {
-            // TODO: This gives no feedback to the user, and it only works if the text is tapped
-            UIPasteboard.general.setValue(notification.formatMessage(), forPasteboardType: UTType.plainText.identifier)
+        .contextMenu {
+            Button {
+                var text = ""
+                if let title = notification.formatTitle(), !title.isEmpty {
+                    text = title + "\n"
+                }
+                text += notification.formatMessage()
+                UIPasteboard.general.string = text
+                withAnimation {
+                    showCopiedToast = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    withAnimation {
+                        showCopiedToast = false
+                    }
+                }
+            } label: {
+                Label("Copy", systemImage: "doc.on.doc")
+            }
         }
     }
     
-    @ViewBuilder
     private func actionButton(action: Action) -> some View {
-        if #available(iOS 15, *) {
-            Button(action.label) {
-                ActionExecutor.execute(action)
-            }
-            .buttonStyle(.borderedProminent)
-        } else {
-            Button(action: {
-                ActionExecutor.execute(action)
-            }) {
-                Text(action.label)
-                    .padding(EdgeInsets(top: 10.0, leading: 10.0, bottom: 10.0, trailing: 10.0))
-                    .foregroundColor(.white)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.white, lineWidth: 2)
-                    )
-            }
-            .background(Color.accentColor)
-            .cornerRadius(10)
+        ActionButton(action: action)
+    }
+}
+
+struct ActionButton: View {
+    let action: Action
+
+    var body: some View {
+        Button(action: {
+            ActionExecutor.execute(action)
+        }) {
+            Text(action.label)
         }
+        .prominentButtonStyle()
     }
 }
 

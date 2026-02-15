@@ -307,8 +307,9 @@ final class NtfyClient: NSObject, @unchecked Sendable {
             }
             
             if message.event == "message" {
+                let receivedMessage = message
                 callDelegate { delegate in
-                    delegate.ntfyClient(self, didReceiveMessage: message)
+                    delegate.ntfyClient(self, didReceiveMessage: receivedMessage)
                 }
             }
         } catch {
