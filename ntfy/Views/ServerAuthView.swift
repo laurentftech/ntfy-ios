@@ -231,15 +231,16 @@ struct ServerListView: View {
 /// Row view for a server
 struct ServerRowView: View {
     @EnvironmentObject private var store: Store
-    
+    @EnvironmentObject private var appDelegate: AppDelegate
+
     let baseUrl: String
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 Text(baseUrl)
                     .font(.body)
-                
+
                 if let user = store.getUser(baseUrl: baseUrl) {
                     if let password = user.password, password.hasPrefix("TOKEN:") {
                         HStack(spacing: 4) {
@@ -264,8 +265,42 @@ struct ServerRowView: View {
                         .foregroundColor(.orange)
                 }
             }
-            
+
             Spacer()
+
+            // Add connection status indicator - safely access pollingService via appDelegate
+            connectionStatusView
+        }
+    }
+
+    @ViewBuilder
+    private var connectionStatusView: some View {
+        // Safely access the connection state with a default value if pollingService is not available
+        let state = getConnectionState()
+
+        Circle()
+            .fill(connectionColor(for: state))
+            .frame(width: 10, height: 10)
+            .help(state.rawValue)
+    }
+
+    private func getConnectionState() -> ConnectionState {
+        // Use appDelegate.pollingService like SubscriptionListView does
+        // This prevents crashes when the environment object is not provided
+        guard let pollingService = appDelegate.pollingService else {
+            return .disconnected
+        }
+        return pollingService.connectionStates[baseUrl] ?? .disconnected
+    }
+
+    private func connectionColor(for state: ConnectionState) -> Color {
+        switch state {
+        case .connected:
+            return .green
+        case .connecting:
+            return .orange
+        case .disconnected:
+            return .red
         }
     }
 }
