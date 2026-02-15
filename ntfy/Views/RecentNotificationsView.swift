@@ -56,9 +56,6 @@ struct RecentNotificationsView: View {
             }
             ForEach(filteredNotifications, id: \.self) { notification in
                 NotificationRowView(notification: notification, showCopiedToast: $showCopiedToast, showTopicBadge: true)
-                    .swipeToMarkAsRead {
-                        markAsRead(notification)
-                    }
             }
         }
         .listStyle(PlainListStyle())
@@ -93,10 +90,5 @@ struct RecentNotificationsView: View {
             },
             alignment: .bottom
         )
-    }
-
-    private func markAsRead(_ notification: Notification) {
-        notification.seen = true
-        try? store.context.save()
     }
 }

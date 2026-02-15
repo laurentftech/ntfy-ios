@@ -3,6 +3,7 @@ import CoreData
 
 /// Authentication type for server
 enum AuthType: String, CaseIterable {
+    case none = "None"
     case basic = "Username/Password"
     case token = "Access Token"
 }
@@ -10,12 +11,12 @@ enum AuthType: String, CaseIterable {
 /// View for configuring server authentication (username/password or token)
 struct ServerAuthView: View {
     @EnvironmentObject private var store: Store
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     
     let baseUrl: String
     let existingUser: User?
     
-    @State private var authType: AuthType = .basic
+    @State private var authType: AuthType = .none
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var token: String = ""
@@ -29,94 +30,94 @@ struct ServerAuthView: View {
     }
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(
-                    header: Text("Server"),
-                    footer: Text("Configure authentication for this server")
-                ) {
-                    Text(baseUrl)
+        Form {
+            Section(
+                header: Text("Server"),
+                footer: Text("Configure authentication for this server")
+            ) {
+                Text(baseUrl)
+                    .foregroundColor(.secondary)
+            }
+
+            Section(
+                header: Text("Authentication")
+            ) {
+                Picker("Type", selection: $authType) {
+                    ForEach(AuthType.allCases, id: \.self) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+            }
+
+            if authType == .basic {
+                Section(header: Text("Credentials")) {
+                    TextField("Username", text: $username)
+                        .disableAutocapitalization()
+                        .disableAutocorrection(true)
+
+                    SecureField("Password", text: $password)
+                }
+            } else if authType == .token {
+                Section(header: Text("Access Token")) {
+                    SecureField("Token", text: $token)
+                        .disableAutocapitalization()
+                        .disableAutocorrection(true)
+
+                    Text("Enter your ntfy access token")
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
-                Section(
-                    header: Text("Authentication")
-                ) {
-                    Picker("Type", selection: $authType) {
-                        ForEach(AuthType.allCases, id: \.self) { type in
-                            Text(type.rawValue).tag(type)
+            }
+
+            Section {
+                Button(action: testConnection) {
+                    HStack {
+                        Spacer()
+                        if testInProgress {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                        } else {
+                            Text("Test Authentication")
                         }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-                
-                if authType == .basic {
-                    Section(header: Text("Credentials")) {
-                        TextField("Username", text: $username)
-                            .disableAutocapitalization()
-                            .disableAutocorrection(true)
-                        
-                        SecureField("Password", text: $password)
-                    }
-                } else {
-                    Section(header: Text("Access Token")) {
-                        SecureField("Token", text: $token)
-                            .disableAutocapitalization()
-                            .disableAutocorrection(true)
-                        
-                        Text("Enter your ntfy access token")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Spacer()
                     }
                 }
-                
-                Section {
-                    Button(action: testConnection) {
-                        HStack {
-                            Spacer()
-                            if testInProgress {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            } else {
-                                Text("Test Authentication")
-                            }
-                            Spacer()
-                        }
-                    }
-                    .disabled(testInProgress)
-                    
-                    if let result = testResult {
-                        Text(result)
-                            .font(.caption)
-                            .foregroundColor(result.contains("Success") ? .green : .red)
-                    }
+                .disabled(testInProgress)
+
+                if let result = testResult {
+                    Text(result)
+                        .font(.caption)
+                        .foregroundColor(result.contains("Success") ? .green : .red)
                 }
             }
-            .navigationTitle("Server Auth")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+
+            Section {
+                Button(action: saveAuth) {
+                    HStack {
+                        Spacer()
+                        Text("Save")
+                            .fontWeight(.semibold)
+                        Spacer()
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveAuth()
-                    }
-                    .disabled(!isValid)
-                }
+                .disabled(!isValid)
             }
-            .onAppear {
-                loadExistingAuth()
-            }
+        }
+        .navigationTitle("Server Auth")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            loadExistingAuth()
         }
     }
     
     private var isValid: Bool {
-        if authType == .basic {
+        switch authType {
+        case .none:
+            return true
+        case .basic:
             return !username.isEmpty && !password.isEmpty
-        } else {
+        case .token:
             return !token.isEmpty
         }
     }
@@ -138,12 +139,20 @@ struct ServerAuthView: View {
     }
     
     private func saveAuth() {
-        if authType == .token {
+        switch authType {
+        case .none:
+            // Remove existing credentials if any
+            if let user = store.getUser(baseUrl: baseUrl) {
+                store.delete(user: user)
+            }
+        case .token:
             store.saveUserWithToken(baseUrl: baseUrl, token: token)
-        } else {
+        case .basic:
             store.saveUser(baseUrl: baseUrl, username: username, password: password)
         }
-        dismiss()
+        // Save the server URL in preferences so it persists in the server list
+        store.saveServer(baseUrl: baseUrl)
+        presentationMode.wrappedValue.dismiss()
     }
     
     private func testConnection() {
@@ -192,16 +201,19 @@ struct ServerAuthView: View {
 struct ServerListView: View {
     @EnvironmentObject private var store: Store
     @FetchRequest(sortDescriptors: []) var subscriptions: FetchedResults<Subscription>
-    
+
     @State private var showAddServer = false
     @State private var newServerUrl: String = ""
-    
-    /// Get unique base URLs from subscriptions
+    @State private var showAuthForNewServer = false
+    @State private var pendingServerUrl: String = ""
+
+    /// Get unique server URLs from saved servers + subscriptions
     private var serverUrls: [String] {
-        let urls = subscriptions.compactMap { $0.baseUrl }
-        return Array(Set(urls)).sorted()
+        var urls = Set(store.getServers())
+        urls.formUnion(subscriptions.compactMap { $0.baseUrl })
+        return urls.sorted()
     }
-    
+
     var body: some View {
         List {
             ForEach(serverUrls, id: \.self) { url in
@@ -209,36 +221,55 @@ struct ServerListView: View {
                     ServerRowView(baseUrl: url)
                 }
             }
-            
+
             Button(action: { showAddServer = true }) {
                 HStack {
                     Image(systemName: "plus")
                     Text("Add Server")
                 }
             }
+
+            NavigationLink(destination: ServerAuthView(baseUrl: pendingServerUrl), isActive: $showAuthForNewServer) {
+                EmptyView()
+            }
+            .hidden()
         }
         .sheet(isPresented: $showAddServer) {
             AddServerSheet(newServerUrl: $newServerUrl, onAdd: addServer)
         }
     }
-    
+
     private func addServer() {
+        var url = newServerUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !url.hasPrefix("http://") && !url.hasPrefix("https://") {
+            url = "https://\(url)"
+        }
+        // Remove trailing slash
+        while url.hasSuffix("/") {
+            url.removeLast()
+        }
+        pendingServerUrl = url
+        newServerUrl = ""
         showAddServer = false
-        // Navigate to auth config for new server
+        // Navigate to auth config after a brief delay to let sheet dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            showAuthForNewServer = true
+        }
     }
 }
 
 /// Row view for a server
 struct ServerRowView: View {
     @EnvironmentObject private var store: Store
-    @EnvironmentObject private var appDelegate: AppDelegate
 
     let baseUrl: String
+
+    @State private var serverReachable: Bool? = nil
 
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                Text(baseUrl)
+                Text(shortUrl(url: baseUrl))
                     .font(.body)
 
                 if let user = store.getUser(baseUrl: baseUrl) {
@@ -260,48 +291,47 @@ struct ServerRowView: View {
                         .foregroundColor(.secondary)
                     }
                 } else {
-                    Text("Not configured")
+                    Text("No authentication")
                         .font(.caption)
-                        .foregroundColor(.orange)
+                        .foregroundColor(.secondary)
                 }
             }
 
             Spacer()
 
-            // Add connection status indicator - safely access pollingService via appDelegate
-            connectionStatusView
+            // Connection status based on health check
+            if let reachable = serverReachable {
+                Circle()
+                    .fill(reachable ? Color.green : Color.red)
+                    .frame(width: 10, height: 10)
+            } else {
+                Circle()
+                    .fill(Color.orange)
+                    .frame(width: 10, height: 10)
+            }
+        }
+        .onAppear {
+            checkServerHealth()
         }
     }
 
-    @ViewBuilder
-    private var connectionStatusView: some View {
-        // Safely access the connection state with a default value if pollingService is not available
-        let state = getConnectionState()
-
-        Circle()
-            .fill(connectionColor(for: state))
-            .frame(width: 10, height: 10)
-            .help(state.rawValue)
-    }
-
-    private func getConnectionState() -> ConnectionState {
-        // Use appDelegate.pollingService like SubscriptionListView does
-        // This prevents crashes when the environment object is not provided
-        guard let pollingService = appDelegate.pollingService else {
-            return .disconnected
+    private func checkServerHealth() {
+        serverReachable = nil
+        guard let url = URL(string: "\(baseUrl)/v1/health") else {
+            serverReachable = false
+            return
         }
-        return pollingService.connectionStates[baseUrl] ?? .disconnected
-    }
-
-    private func connectionColor(for state: ConnectionState) -> Color {
-        switch state {
-        case .connected:
-            return .green
-        case .connecting:
-            return .orange
-        case .disconnected:
-            return .red
-        }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 5
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            DispatchQueue.main.async {
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                    serverReachable = true
+                } else {
+                    serverReachable = false
+                }
+            }
+        }.resume()
     }
 }
 

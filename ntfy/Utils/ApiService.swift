@@ -138,8 +138,20 @@ class ApiService {
 struct BasicUser {
     let username: String
     let password: String
-    
+
+    var isTokenAuth: Bool {
+        return password.hasPrefix("TOKEN:")
+    }
+
+    var token: String? {
+        guard isTokenAuth else { return nil }
+        return String(password.dropFirst(6))
+    }
+
     func toHeader() -> String {
+        if isTokenAuth, let token = token {
+            return "Bearer \(token)"
+        }
         return "Basic " + String(format: "%@:%@", username, password).data(using: String.Encoding.utf8)!.base64EncodedString()
     }
 }

@@ -705,6 +705,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfy;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -716,7 +717,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.3;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laurentf.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -739,6 +740,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfy/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfy;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -750,7 +752,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.3;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laurentf.ntfy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -764,7 +766,7 @@
 				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
-				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				DEVELOPMENT_TEAM = D2Z26AS3NJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfyNSE/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
@@ -776,7 +778,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.3;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laurentf.ntfy.ntfyNSE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -791,7 +793,7 @@
 				CODE_SIGN_ENTITLEMENTS = ntfyNSE/ntfyNSE.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 4;
-				DEVELOPMENT_TEAM = YXQ4AMS4B4;
+				DEVELOPMENT_TEAM = D2Z26AS3NJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ntfyNSE/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ntfyNSE;
@@ -803,7 +805,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.3;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyNSE;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laurentf.ntfy.ntfyNSE;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;

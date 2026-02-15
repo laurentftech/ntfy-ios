@@ -12,14 +12,12 @@ struct GroupedNotificationsView: View {
     @EnvironmentObject private var appDelegate: AppDelegate
     @ObservedObject var allNotificationsModel: AllNotificationsObservable
 
+    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Subscription.topic, ascending: true)]) var subscriptions: FetchedResults<Subscription>
+
     @Binding var searchText: String
     @Binding var isSearching: Bool
     @State private var showCopiedToast = false
     @State private var readFilter: NotificationReadFilter = .all
-
-    private var subscriptions: [Subscription] {
-        return store.getSubscriptions() ?? []
-    }
 
     /// Groups notifications by subscription, sorted by most recent notification time
     private var groupedNotifications: [(subscription: Subscription, notifications: [Notification], unreadCount: Int)] {
@@ -38,10 +36,9 @@ struct GroupedNotificationsView: View {
         }
 
         // Sort groups by most recent notification time (descending)
-        // Exclude topics without notifications
-        return subscriptions.compactMap { subscription -> (subscription: Subscription, notifications: [Notification], unreadCount: Int)? in
+        // Topics with notifications first, then empty topics
+        return subscriptions.map { subscription -> (subscription: Subscription, notifications: [Notification], unreadCount: Int) in
             let notifications = grouped[subscription.objectID] ?? []
-            guard !notifications.isEmpty else { return nil }
             let unreadCount = notifications.filter { !$0.seen }.count
             return (subscription: subscription, notifications: notifications, unreadCount: unreadCount)
         }.sorted { first, second in
@@ -98,26 +95,32 @@ struct GroupedNotificationsView: View {
                         Text(group.subscription.displayName())
                             .font(.headline)
                         Spacer()
-                        if group.unreadCount > 0 {
-                            Text("\(group.unreadCount)")
+                        if group.notifications.isEmpty {
+                            Text("No notifications")
                                 .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.blue)
-                                .cornerRadius(10)
+                                .foregroundColor(.secondary)
+                        } else {
+                            if group.unreadCount > 0 {
+                                Text("\(group.unreadCount)")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.blue)
+                                    .cornerRadius(10)
+                            }
+                            Text("(\(group.notifications.count))")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
-                        Text("(\(group.notifications.count))")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
                     }
                 }
             }
         }
         .listStyle(PlainListStyle())
         .overlay(Group {
-            if allNotificationsModel.notifications.isEmpty {
+            if subscriptions.isEmpty {
                 VStack {
                     Text("No subscriptions yet")
                         .font(.title2)
@@ -147,11 +150,6 @@ struct GroupedNotificationsView: View {
             },
             alignment: .bottom
         )
-    }
-
-    private func markAsRead(_ notification: Notification) {
-        notification.seen = true
-        try? store.context.save()
     }
 }
 

@@ -11,6 +11,10 @@ struct NotificationRowView: View {
             .swipeToDelete {
                 store.delete(notification: notification)
             }
+            .swipeToToggleRead(isSeen: notification.seen) {
+                notification.seen.toggle()
+                try? store.context.save()
+            }
     }
 
     private var notificationRow: some View {

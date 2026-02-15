@@ -21,8 +21,8 @@ extension View {
         modifier(SwipeToDeleteModifier(action: action))
     }
 
-    func swipeToMarkAsRead(action: @escaping () -> Void) -> some View {
-        modifier(SwipeToMarkAsReadModifier(action: action))
+    func swipeToToggleRead(isSeen: Bool, action: @escaping () -> Void) -> some View {
+        modifier(SwipeToToggleReadModifier(isSeen: isSeen, action: action))
     }
 
     func prominentButtonStyle() -> some View {
@@ -66,7 +66,8 @@ struct SwipeToDeleteModifier: ViewModifier {
     }
 }
 
-struct SwipeToMarkAsReadModifier: ViewModifier {
+struct SwipeToToggleReadModifier: ViewModifier {
+    let isSeen: Bool
     let action: () -> Void
 
     func body(content: Content) -> some View {
@@ -74,7 +75,11 @@ struct SwipeToMarkAsReadModifier: ViewModifier {
             content
                 .swipeActions(edge: .leading) {
                     Button(action: action) {
-                        Label("Read", systemImage: "envelope.open")
+                        if isSeen {
+                            Label("Unread", systemImage: "envelope.badge")
+                        } else {
+                            Label("Read", systemImage: "envelope.open")
+                        }
                     }
                     .tint(.blue)
                 }

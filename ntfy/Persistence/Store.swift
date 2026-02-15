@@ -10,6 +10,7 @@ class Store: ObservableObject {
     static let appGroup = "group.io.heckel.ntfy" // Must match app group of ntfy = ntfyNSE targets
     static let modelName = "ntfy" // Must match .xdatamodeld folder
     static let prefKeyDefaultBaseUrl = "defaultBaseUrl"
+    static let prefKeyServers = "servers"
     
     private let container: NSPersistentContainer
     var context: NSManagedObjectContext {
@@ -269,6 +270,51 @@ class Store: ObservableObject {
         return baseUrl!
     }
     
+    // MARK: Server management
+
+    func saveServer(baseUrl: String) {
+        var servers = getServers()
+        if !servers.contains(baseUrl) {
+            servers.append(baseUrl)
+            do {
+                let pref = getPreference(key: Store.prefKeyServers) ?? Preference(context: context)
+                pref.key = Store.prefKeyServers
+                pref.value = servers.joined(separator: "\n")
+                try context.save()
+                objectWillChange.send()
+            } catch let error {
+                Log.w(Store.tag, "Cannot store servers", error)
+                rollbackAndRefresh()
+            }
+        }
+    }
+
+    func removeServer(baseUrl: String) {
+        var servers = getServers()
+        servers.removeAll { $0 == baseUrl }
+        do {
+            let pref = getPreference(key: Store.prefKeyServers) ?? Preference(context: context)
+            pref.key = Store.prefKeyServers
+            pref.value = servers.joined(separator: "\n")
+            try context.save()
+            objectWillChange.send()
+        } catch let error {
+            Log.w(Store.tag, "Cannot store servers", error)
+            rollbackAndRefresh()
+        }
+    }
+
+    func getServers() -> [String] {
+        guard let value = getPreference(key: Store.prefKeyServers)?.value, !value.isEmpty else {
+            return [Config.appBaseUrl]
+        }
+        var servers = value.components(separatedBy: "\n").filter { !$0.isEmpty }
+        if !servers.contains(Config.appBaseUrl) {
+            servers.insert(Config.appBaseUrl, at: 0)
+        }
+        return servers
+    }
+
     private func getPreference(key: String) -> Preference? {
         let request = Preference.fetchRequest()
         request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "key = %@", key)])
