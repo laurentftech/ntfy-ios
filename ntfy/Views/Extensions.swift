@@ -21,6 +21,10 @@ extension View {
         modifier(SwipeToDeleteModifier(action: action))
     }
 
+    func swipeToMarkAsRead(action: @escaping () -> Void) -> some View {
+        modifier(SwipeToMarkAsReadModifier(action: action))
+    }
+
     func prominentButtonStyle() -> some View {
         modifier(ProminentButtonModifier())
     }
@@ -55,6 +59,24 @@ struct SwipeToDeleteModifier: ViewModifier {
                     Button(role: .destructive, action: action) {
                         Label("Delete", systemImage: "trash.circle")
                     }
+                }
+        } else {
+            content
+        }
+    }
+}
+
+struct SwipeToMarkAsReadModifier: ViewModifier {
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 15.0, *) {
+            content
+                .swipeActions(edge: .leading) {
+                    Button(action: action) {
+                        Label("Read", systemImage: "envelope.open")
+                    }
+                    .tint(.blue)
                 }
         } else {
             content

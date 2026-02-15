@@ -78,7 +78,7 @@ struct ServerAuthView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle())
                             } else {
-                                Text("Test Connection")
+                                Text("Test Authentication")
                             }
                             Spacer()
                         }

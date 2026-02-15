@@ -17,8 +17,12 @@ struct NotificationListView: View {
     @State private var editMode = EditMode.inactive
     @State private var selection = Set<Notification>()
     @State private var searchText = ""
+    @State private var isSearching = false
     @State private var lastRefreshed: Date? = nil
     @State private var showCopiedToast = false
+    @State private var readFilter: NotificationReadFilter = .all
+
+    @Environment(\.presentationMode) private var presentationMode
 
     @State private var showAlert = false
     @State private var activeAlert: ActiveAlert = .clear
@@ -28,15 +32,24 @@ struct NotificationListView: View {
     }
     
     private var filteredNotifications: [Notification] {
-        if searchText.isEmpty {
-            return notificationsModel.notifications
+        var notifications = notificationsModel.notifications
+
+        // Apply read/unread filter
+        if readFilter == .unread {
+            notifications = notifications.filter { !$0.seen }
         }
-        let query = searchText.lowercased()
-        return notificationsModel.notifications.filter { notification in
-            (notification.message?.lowercased().contains(query) ?? false) ||
-            (notification.title?.lowercased().contains(query) ?? false) ||
-            (notification.tags?.lowercased().contains(query) ?? false)
+
+        // Apply search filter
+        if !searchText.isEmpty {
+            let query = searchText.lowercased()
+            notifications = notifications.filter { notification in
+                (notification.message?.lowercased().contains(query) ?? false) ||
+                (notification.title?.lowercased().contains(query) ?? false) ||
+                (notification.tags?.lowercased().contains(query) ?? false)
+            }
         }
+
+        return notifications
     }
 
     init(subscription: Subscription) {
@@ -47,20 +60,32 @@ struct NotificationListView: View {
     var body: some View {
         if #available(iOS 15.0, *) {
             notificationList
-                .searchable(text: $searchText, prompt: "Search notifications")
-                .refreshable {
-                    subscriptionManager.poll(subscription)
-                    lastRefreshed = Date()
-                }
+            .refreshable {
+                subscriptionManager.poll(subscription)
+                lastRefreshed = Date()
+            }
+            .navigationTitle(subscription.displayName())
         } else {
             notificationList
+                .navigationTitle(subscription.displayName())
         }
     }
     
     private var notificationList: some View {
         List(selection: $selection) {
-            ForEach(filteredNotifications, id: \.self) { notification in
-                NotificationRowView(notification: notification, showCopiedToast: $showCopiedToast)
+            if isSearching {
+                TextField("Search notifications", text: $searchText)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .listRowSeparator(.hidden)
+            }
+            if #available(iOS 15.0, *) {
+                Picker("Filter", selection: $readFilter) {
+                    ForEach(NotificationReadFilter.allCases, id: \.self) { filter in
+                        Text(filter.rawValue).tag(filter)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .listRowSeparator(.hidden)
             }
             if #available(iOS 15.0, *), let lastRefreshed = lastRefreshed, !filteredNotifications.isEmpty {
                 Text("Last updated: \(lastRefreshed, style: .relative) ago")
@@ -69,20 +94,19 @@ struct NotificationListView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowSeparator(.hidden)
             }
+            ForEach(filteredNotifications, id: \.self) { notification in
+                NotificationRowView(notification: notification, showCopiedToast: $showCopiedToast)
+            }
         }
         .listStyle(PlainListStyle())
-        .navigationBarTitleDisplayMode(.inline)
         .environment(\.editMode, self.$editMode)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 if (self.editMode != .active) {
                     Button(action: {
-                        // iOS bug (?): We create a custom back button, because the original back button doesn't reset
-                        // selectedBaseUrl early enough and the row stays highlighted for a long time,
-                        // which is weird and feels wrong. This avoids that behavior.
-                        
                         self.delegate.selectedBaseUrl = nil
+                        presentationMode.wrappedValue.dismiss()
                     }){
                         Image(systemName: "chevron.left")
                     }
@@ -99,6 +123,14 @@ struct NotificationListView: View {
                     editButton
                 } else {
                     Menu {
+                        Button {
+                            withAnimation {
+                                isSearching.toggle()
+                                if !isSearching { searchText = "" }
+                            }
+                        } label: {
+                            Label(isSearching ? "Hide search" : "Search", systemImage: isSearching ? "xmark" : "magnifyingglass")
+                        }
                         if #unavailable(iOS 15.0) {
                             Button("Refresh") {
                                 subscriptionManager.poll(subscription)
@@ -255,6 +287,7 @@ struct NotificationListView: View {
             subscriptionManager.unsubscribe(subscription)
         }
         delegate.selectedBaseUrl = nil
+        presentationMode.wrappedValue.dismiss()
     }
     
     private func deleteAll() {

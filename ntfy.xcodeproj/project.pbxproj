@@ -12,6 +12,13 @@
 		4D1326DC2F412F530023BB5C /* PollingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1326DA2F412F530023BB5C /* PollingService.swift */; };
 		4D1326DF2F4136AB0023BB5C /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1326DE2F4136AA0023BB5C /* ToastView.swift */; };
 		4D1326E02F4136AB0023BB5C /* ServerAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1326DD2F4136AA0023BB5C /* ServerAuthView.swift */; };
+		4D1327012F41A0000023BB5C /* AllNotificationsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327002F41A0000023BB5C /* AllNotificationsObservable.swift */; };
+		4D1327032F41A0010023BB5C /* NotificationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327022F41A0010023BB5C /* NotificationRowView.swift */; };
+		4D1327052F41B0000023BB5C /* PollingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327042F41B0000023BB5C /* PollingServiceTests.swift */; };
+		4D1327072F41B0010023BB5C /* UnifiedNotificationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327062F41B0010023BB5C /* UnifiedNotificationsTests.swift */; };
+		4DE1F7C82F4203ED00E67369 /* UnifiedNotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE1F7C72F4203ED00E67369 /* UnifiedNotificationsView.swift */; };
+		4DE1F7CA2F42040800E67369 /* RecentNotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE1F7C92F42040800E67369 /* RecentNotificationsView.swift */; };
+		4DE1F7CC2F420DED00E67369 /* GroupedNotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DE1F7CB2F420DED00E67369 /* GroupedNotificationsView.swift */; };
 		9407EDDA284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9407EDDB284ADE1F00C1C334 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9407EDD9284ADE1F00C1C334 /* User.swift */; };
 		9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F1C0282F2AA700CDE4DD /* AppMain.swift */; };
@@ -56,26 +63,22 @@
 		94E9196C28353E0100F30170 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9474F216283531A200CDE4DD /* Log.swift */; };
 		E27008102AF0F64B006E33BA /* SubscriptionsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */; };
 		E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27008112AF1030A006E33BA /* NotificationsObservable.swift */; };
-		4D1327012F41A0000023BB5C /* AllNotificationsObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327002F41A0000023BB5C /* AllNotificationsObservable.swift */; };
-		4D1327032F41A0010023BB5C /* NotificationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327022F41A0010023BB5C /* NotificationRowView.swift */; };
-		4D1327052F41B0000023BB5C /* PollingServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327042F41B0000023BB5C /* PollingServiceTests.swift */; };
-		4D1327072F41B0010023BB5C /* UnifiedNotificationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1327062F41B0010023BB5C /* UnifiedNotificationsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9474F1B5282F2AA700CDE4DD /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9474F1E3282F3FFD00CDE4DD;
-			remoteInfo = ntfyNSE;
-		};
 		4D1327152F41B1000023BB5C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9474F1B5282F2AA700CDE4DD /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 9474F1BC282F2AA700CDE4DD;
 			remoteInfo = ntfy;
+		};
+		9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9474F1B5282F2AA700CDE4DD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9474F1E3282F3FFD00CDE4DD;
+			remoteInfo = ntfyNSE;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -99,6 +102,14 @@
 		4D1326DA2F412F530023BB5C /* PollingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollingService.swift; sourceTree = "<group>"; };
 		4D1326DD2F4136AA0023BB5C /* ServerAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerAuthView.swift; sourceTree = "<group>"; };
 		4D1326DE2F4136AA0023BB5C /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		4D1327002F41A0000023BB5C /* AllNotificationsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotificationsObservable.swift; sourceTree = "<group>"; };
+		4D1327022F41A0010023BB5C /* NotificationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRowView.swift; sourceTree = "<group>"; };
+		4D1327042F41B0000023BB5C /* PollingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollingServiceTests.swift; sourceTree = "<group>"; };
+		4D1327062F41B0010023BB5C /* UnifiedNotificationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedNotificationsTests.swift; sourceTree = "<group>"; };
+		4D1327102F41B1000023BB5C /* ntfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ntfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DE1F7C72F4203ED00E67369 /* UnifiedNotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedNotificationsView.swift; sourceTree = "<group>"; };
+		4DE1F7C92F42040800E67369 /* RecentNotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentNotificationsView.swift; sourceTree = "<group>"; };
+		4DE1F7CB2F420DED00E67369 /* GroupedNotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupedNotificationsView.swift; sourceTree = "<group>"; };
 		9407EDD9284ADE1F00C1C334 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		9474F1BD282F2AA700CDE4DD /* ntfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ntfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9474F1C0282F2AA700CDE4DD /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
@@ -134,14 +145,16 @@
 		94CD1969283E666900973B93 /* EmojiManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmojiManager.swift; sourceTree = "<group>"; };
 		E270080F2AF0F64B006E33BA /* SubscriptionsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsObservable.swift; sourceTree = "<group>"; };
 		E27008112AF1030A006E33BA /* NotificationsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsObservable.swift; sourceTree = "<group>"; };
-		4D1327002F41A0000023BB5C /* AllNotificationsObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotificationsObservable.swift; sourceTree = "<group>"; };
-		4D1327022F41A0010023BB5C /* NotificationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRowView.swift; sourceTree = "<group>"; };
-		4D1327042F41B0000023BB5C /* PollingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollingServiceTests.swift; sourceTree = "<group>"; };
-		4D1327062F41B0010023BB5C /* UnifiedNotificationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedNotificationsTests.swift; sourceTree = "<group>"; };
-		4D1327102F41B1000023BB5C /* ntfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ntfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4D1327132F41B1000023BB5C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1BA282F2AA700CDE4DD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -157,16 +170,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4D1327132F41B1000023BB5C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4D13270A2F41B0020023BB5C /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				4D1327042F41B0000023BB5C /* PollingServiceTests.swift */,
+				4D1327062F41B0010023BB5C /* UnifiedNotificationsTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		9474F1B4282F2AA700CDE4DD = {
 			isa = PBXGroup;
 			children = (
@@ -230,6 +245,9 @@
 		9474F202283170F000CDE4DD /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4DE1F7CB2F420DED00E67369 /* GroupedNotificationsView.swift */,
+				4DE1F7C92F42040800E67369 /* RecentNotificationsView.swift */,
+				4DE1F7C72F4203ED00E67369 /* UnifiedNotificationsView.swift */,
 				4D1326DD2F4136AA0023BB5C /* ServerAuthView.swift */,
 				4D1326DE2F4136AA0023BB5C /* ToastView.swift */,
 				02024E5F283D7CBB0064224A /* Extensions.swift */,
@@ -297,18 +315,27 @@
 			path = Assets;
 			sourceTree = "<group>";
 		};
-		4D13270A2F41B0020023BB5C /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-				4D1327042F41B0000023BB5C /* PollingServiceTests.swift */,
-				4D1327062F41B0010023BB5C /* UnifiedNotificationsTests.swift */,
-			);
-			path = Tests;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4D1327112F41B1000023BB5C /* ntfyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4D1327192F41B1000023BB5C /* Build configuration list for PBXNativeTarget "ntfyTests" */;
+			buildPhases = (
+				4D1327122F41B1000023BB5C /* Sources */,
+				4D1327132F41B1000023BB5C /* Frameworks */,
+				4D1327142F41B1000023BB5C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4D1327162F41B1000023BB5C /* PBXTargetDependency */,
+			);
+			name = ntfyTests;
+			productName = ntfyTests;
+			productReference = 4D1327102F41B1000023BB5C /* ntfyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		9474F1BC282F2AA700CDE4DD /* ntfy */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9474F1CB282F2AA800CDE4DD /* Build configuration list for PBXNativeTarget "ntfy" */;
@@ -348,24 +375,6 @@
 			productReference = 9474F1E4282F3FFD00CDE4DD /* ntfyNSE.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		4D1327112F41B1000023BB5C /* ntfyTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4D1327192F41B1000023BB5C /* Build configuration list for PBXNativeTarget "ntfyTests" */;
-			buildPhases = (
-				4D1327122F41B1000023BB5C /* Sources */,
-				4D1327132F41B1000023BB5C /* Frameworks */,
-				4D1327142F41B1000023BB5C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				4D1327162F41B1000023BB5C /* PBXTargetDependency */,
-			);
-			name = ntfyTests;
-			productName = ntfyTests;
-			productReference = 4D1327102F41B1000023BB5C /* ntfyTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -376,15 +385,15 @@
 				LastSwiftUpdateCheck = 1330;
 				LastUpgradeCheck = 1330;
 				TargetAttributes = {
+					4D1327112F41B1000023BB5C = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 9474F1BC282F2AA700CDE4DD;
+					};
 					9474F1BC282F2AA700CDE4DD = {
 						CreatedOnToolsVersion = 13.3.1;
 					};
 					9474F1E3282F3FFD00CDE4DD = {
 						CreatedOnToolsVersion = 13.3.1;
-					};
-					4D1327112F41B1000023BB5C = {
-						CreatedOnToolsVersion = 15.0;
-						TestTargetID = 9474F1BC282F2AA700CDE4DD;
 					};
 				};
 			};
@@ -412,6 +421,13 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4D1327142F41B1000023BB5C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1BB282F2AA700CDE4DD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -431,16 +447,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4D1327142F41B1000023BB5C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4D1327122F41B1000023BB5C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D1327052F41B0000023BB5C /* PollingServiceTests.swift in Sources */,
+				4D1327072F41B0010023BB5C /* UnifiedNotificationsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9474F1B9282F2AA700CDE4DD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -460,15 +478,18 @@
 				9474F1F22830825600CDE4DD /* SubscriptionListView.swift in Sources */,
 				E27008122AF1030A006E33BA /* NotificationsObservable.swift in Sources */,
 				9486714A2841D0CE0093C7A4 /* ActionExecutor.swift in Sources */,
+				4DE1F7CA2F42040800E67369 /* RecentNotificationsView.swift in Sources */,
 				9474F1FD2831311A00CDE4DD /* SubscriptionAddView.swift in Sources */,
 				9474F1FF28316ACE00CDE4DD /* Subscription.swift in Sources */,
 				94CD196A283E666900973B93 /* EmojiManager.swift in Sources */,
+				4DE1F7C82F4203ED00E67369 /* UnifiedNotificationsView.swift in Sources */,
 				9474F1C1282F2AA700CDE4DD /* AppMain.swift in Sources */,
 				94867143283EC9960093C7A4 /* Actions.swift in Sources */,
 				4D1326DB2F412F530023BB5C /* NtfyClient.swift in Sources */,
 				4D1326DC2F412F530023BB5C /* PollingService.swift in Sources */,
 				9474F20F283326C500CDE4DD /* ApiService.swift in Sources */,
 				94B736D7284AF9BE003D69FB /* MainView.swift in Sources */,
+				4DE1F7CC2F420DED00E67369 /* GroupedNotificationsView.swift in Sources */,
 				9474F1F72830830700CDE4DD /* ntfy.xcdatamodeld in Sources */,
 				4D1326DF2F4136AB0023BB5C /* ToastView.swift in Sources */,
 				4D1326E02F4136AB0023BB5C /* ServerAuthView.swift in Sources */,
@@ -499,31 +520,60 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4D1327122F41B1000023BB5C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4D1327052F41B0000023BB5C /* PollingServiceTests.swift in Sources */,
-				4D1327072F41B0010023BB5C /* UnifiedNotificationsTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		9474F1EA282F3FFD00CDE4DD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9474F1E3282F3FFD00CDE4DD /* ntfyNSE */;
-			targetProxy = 9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */;
-		};
 		4D1327162F41B1000023BB5C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9474F1BC282F2AA700CDE4DD /* ntfy */;
 			targetProxy = 4D1327152F41B1000023BB5C /* PBXContainerItemProxy */;
 		};
+		9474F1EA282F3FFD00CDE4DD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9474F1E3282F3FFD00CDE4DD /* ntfyNSE */;
+			targetProxy = 9474F1E9282F3FFD00CDE4DD /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		4D1327172F41B1000023BB5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D2Z26AS3NJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ntfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ntfy";
+			};
+			name = Debug;
+		};
+		4D1327182F41B1000023BB5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D2Z26AS3NJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ntfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ntfy";
+			};
+			name = Release;
+		};
 		9474F1C9282F2AA800CDE4DD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -762,47 +812,18 @@
 			};
 			name = Release;
 		};
-		4D1327172F41B1000023BB5C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D2Z26AS3NJ;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ntfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ntfy";
-			};
-			name = Debug;
-		};
-		4D1327182F41B1000023BB5C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D2Z26AS3NJ;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.heckel.ntfy.ntfyTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ntfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ntfy";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4D1327192F41B1000023BB5C /* Build configuration list for PBXNativeTarget "ntfyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D1327172F41B1000023BB5C /* Debug */,
+				4D1327182F41B1000023BB5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		9474F1B8282F2AA700CDE4DD /* Build configuration list for PBXProject "ntfy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -826,15 +847,6 @@
 			buildConfigurations = (
 				9474F1ED282F3FFD00CDE4DD /* Debug */,
 				9474F1EE282F3FFD00CDE4DD /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4D1327192F41B1000023BB5C /* Build configuration list for PBXNativeTarget "ntfyTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4D1327172F41B1000023BB5C /* Debug */,
-				4D1327182F41B1000023BB5C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

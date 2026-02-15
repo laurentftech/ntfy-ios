@@ -14,7 +14,16 @@ struct NotificationRowView: View {
     }
 
     private var notificationRow: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        HStack(alignment: .top, spacing: 8) {
+            // Blue indicator for unread messages
+            if !notification.seen {
+                Circle()
+                    .fill(Color.blue)
+                    .frame(width: 8, height: 8)
+                    .padding(.top, 6)
+            }
+            
+            VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center, spacing: 2) {
                 Text(notification.shortDateTime())
                     .font(.subheadline)
@@ -58,6 +67,7 @@ struct NotificationRowView: View {
                     }
                 }
                 .padding([.top], 5)
+            }
             }
         }
         .padding(.all, 4)

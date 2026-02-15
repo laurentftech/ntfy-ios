@@ -10,8 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     private let tag = "AppDelegate"
     private let pollTopic = "~poll" // See ntfy server if ever changed
     
-    // Badge count tracking
-    private var badgeCount: Int = 0
+    // Badge count tracking (no longer using a local counter)
     
     // Implements navigation from notifications, see https://stackoverflow.com/a/70731861/1440785
     @Published var selectedBaseUrl: String? = nil
@@ -161,33 +160,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         Log.e(tag, "Failed to register for remote notifications", error)
     }
     
-    /// Update app icon badge with unread count
-    private func updateBadgeCount() {
-        badgeCount += 1
-        Log.d(tag, "Setting badge count to \(badgeCount)")
-        if #available(iOS 16.0, *) {
-            UNUserNotificationCenter.current().setBadgeCount(badgeCount) { error in
-                if let error = error {
-                    Log.e(self.tag, "Failed to set badge count", error)
+    /// Update app icon badge with actual unread count from Core Data.
+    /// Uses Swift filtering to match AllNotificationsObservable's logic.
+    func updateBadgeCount() {
+        let store = Store.shared
+        let fetchRequest: NSFetchRequest<Notification> = Notification.fetchRequest()
+        do {
+            let all = try store.context.fetch(fetchRequest)
+            let unreadCount = all.filter { !$0.seen }.count
+            Log.d(tag, "Setting badge count to \(unreadCount)")
+            if #available(iOS 16.0, *) {
+                UNUserNotificationCenter.current().setBadgeCount(unreadCount) { error in
+                    if let error = error {
+                        Log.e(self.tag, "Failed to set badge count", error)
+                    }
                 }
+            } else {
+                UIApplication.shared.applicationIconBadgeNumber = unreadCount
             }
-        } else {
-            UIApplication.shared.applicationIconBadgeNumber = badgeCount
-        }
-    }
-    
-    /// Clear app icon badge
-    private func clearBadgeCount() {
-        badgeCount = 0
-        Log.d(tag, "Clearing badge count")
-        if #available(iOS 16.0, *) {
-            UNUserNotificationCenter.current().setBadgeCount(0) { error in
-                if let error = error {
-                    Log.e(self.tag, "Failed to clear badge count", error)
-                }
-            }
-        } else {
-            UIApplication.shared.applicationIconBadgeNumber = 0
+        } catch {
+            Log.e(tag, "Failed to fetch unread count for badge", error)
         }
     }
     
@@ -257,8 +249,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
         
-        // Clear badge when user interacts with notification
-        clearBadgeCount()
+        // Update badge when user interacts with notification
+        updateBadgeCount()
     
         completionHandler()
     }
