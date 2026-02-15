@@ -51,12 +51,12 @@ struct NotificationRowView: View {
             }
             .padding([.bottom], 2)
             if let title = notification.formatTitle(), title != "" {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.headline)
                     .bold()
                     .padding([.bottom], 2)
             }
-            Text(notification.formatMessage())
+            Text(LocalizedStringKey(notification.formatMessage()))
                 .font(.body)
             if !notification.nonEmojiTags().isEmpty {
                 Text("Tags: " + notification.nonEmojiTags().joined(separator: ", "))
