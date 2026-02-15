@@ -69,7 +69,7 @@ final class NtfyClientTests: XCTestCase {
     }
     
     func testClientWithAuthToken() {
-        let client = NtfyClient(serverURL: "https://ntfy.sh", topics: ["test"], authToken: "tk_secret123")
+        let client = NtfyClient(serverURL: "https://ntfy.sh", topics: ["test"], bearerToken: "tk_secret123")
         XCTAssertNotNil(client)
     }
     
