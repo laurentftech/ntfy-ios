@@ -10,9 +10,8 @@ class NotificationsObservable: NSObject, ObservableObject {
         
         // Filter by the desired subscription
         fetchRequest.predicate = NSPredicate(format: "subscription == %@", subscriptionID)
-        
-        // Sort descriptors if you need them
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "time", ascending: false)] // Assuming you have a 'date' attribute on the NotificationEntity
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "time", ascending: false)]
+        fetchRequest.fetchBatchSize = 50
         
         let controller = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: Store.shared.context, sectionNameKeyPath: nil, cacheName: nil)
         controller.delegate = self

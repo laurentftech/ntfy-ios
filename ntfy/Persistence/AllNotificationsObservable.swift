@@ -10,6 +10,7 @@ class AllNotificationsObservable: NSObject, ObservableObject {
     private lazy var fetchedResultsController: NSFetchedResultsController<Notification> = {
         let fetchRequest: NSFetchRequest<Notification> = Notification.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "time", ascending: false)]
+        fetchRequest.fetchBatchSize = 50
 
         let controller = NSFetchedResultsController(
             fetchRequest: fetchRequest,
@@ -41,7 +42,9 @@ class AllNotificationsObservable: NSObject, ObservableObject {
     }
 
     private func updateUnreadCount() {
-        let count = notifications.filter { !$0.seen }.count
+        let fetchRequest: NSFetchRequest<Notification> = Notification.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "seen == NO")
+        let count = (try? context.count(for: fetchRequest)) ?? 0
         unreadCount = count
         updateAppBadge(count)
     }

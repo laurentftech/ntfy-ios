@@ -22,8 +22,8 @@ class EmojiManager {
                 let jsonData = try Data(contentsOf: url)
                 if let jsonEmojis = try? JSONDecoder().decode([Emoji].self, from: jsonData) {
                     for emoji in jsonEmojis {
-                        if !emoji.aliases.isEmpty {
-                            EmojiManager.emojis[emoji.aliases.first!] = emoji
+                        for alias in emoji.aliases {
+                            EmojiManager.emojis[alias] = emoji
                         }
                     }
                 }

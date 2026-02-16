@@ -23,7 +23,7 @@ class ApiService {
         Log.d(tag, "Polling single message from \(url) with user \(user?.username ?? "anonymous")")
         
         let request = newRequest(url: url, user: user)
-        newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
+        session(timeout: 30).dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil, error)
                 return
@@ -55,7 +55,7 @@ class ApiService {
         request.setValue(String(priority), forHTTPHeaderField: "Priority")
         request.setValue(tags.joined(separator: ","), forHTTPHeaderField: "Tags")
         request.httpBody = message.data(using: String.Encoding.utf8)
-        newSession(timeout: 10).dataTask(with: request) { (data, response, error) in
+        session(timeout: 10).dataTask(with: request) { (data, response, error) in
             guard error == nil else {
                 Log.e(self.tag, "Error publishing message", error!)
                 return
@@ -68,7 +68,7 @@ class ApiService {
         guard let url = URL(string: topicAuthUrl(baseUrl: baseUrl, topic: topic)) else { return }
         let request = newRequest(url: url, user: user)
         Log.d(tag, "Checking auth for \(url) with user \(user?.username ?? "anonymous")")
-        newSession(timeout: 10).dataTask(with: request) { (data, response, error) in
+        session(timeout: 10).dataTask(with: request) { (data, response, error) in
             if let error = error {
                 Log.e(self.tag, "Error checking auth: \(error)")
                 completionHandler(.Error(error.localizedDescription))
@@ -98,7 +98,7 @@ class ApiService {
     private func fetchJsonData<T: Decodable>(urlString: String, user: BasicUser?, completionHandler: @escaping ([T]?, Error?) -> ()) {
         guard let url = URL(string: urlString) else { return }
         let request = newRequest(url: url, user: user)
-        newSession(timeout: 30).dataTask(with: request) { (data, response, error) in
+        session(timeout: 30).dataTask(with: request) { (data, response, error) in
             if let error = error {
                 Log.e(self.tag, "Error fetching data", error)
                 completionHandler(nil, error)
@@ -127,11 +127,22 @@ class ApiService {
         return request
     }
     
-    private func newSession(timeout: TimeInterval) -> URLSession {
-        let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = timeout
-        sessionConfig.timeoutIntervalForResource = timeout
-        return URLSession(configuration: sessionConfig)
+    private lazy var shortSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        config.timeoutIntervalForResource = 10
+        return URLSession(configuration: config)
+    }()
+
+    private lazy var longSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 30
+        return URLSession(configuration: config)
+    }()
+
+    private func session(timeout: TimeInterval) -> URLSession {
+        return timeout <= 10 ? shortSession : longSession
     }
 }
 

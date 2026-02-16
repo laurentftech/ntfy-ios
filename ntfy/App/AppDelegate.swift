@@ -115,7 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
         }
         
         FirebaseApp.configure()
-        FirebaseConfiguration.shared.setLoggerLevel(.max)
+        FirebaseConfiguration.shared.setLoggerLevel(.warning)
         Log.i(tag, "Firebase configured successfully")
     }
     
@@ -165,9 +165,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, ObservableObject {
     func updateBadgeCount() {
         let store = Store.shared
         let fetchRequest: NSFetchRequest<Notification> = Notification.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "seen == NO")
         do {
-            let all = try store.context.fetch(fetchRequest)
-            let unreadCount = all.filter { !$0.seen }.count
+            let unreadCount = try store.context.count(for: fetchRequest)
             Log.d(tag, "Setting badge count to \(unreadCount)")
             if #available(iOS 16.0, *) {
                 UNUserNotificationCenter.current().setBadgeCount(unreadCount) { error in
